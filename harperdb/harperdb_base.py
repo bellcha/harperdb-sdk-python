@@ -1,6 +1,7 @@
 import base64
 import json
 import requests
+from urllib3.exceptions import InsecureRequestWarning
 
 from .exceptions import HarperDBError
 
@@ -12,9 +13,10 @@ class HarperDBBase():
 
     ERROR_HASH = 'Hash value \"{}\" not found'
 
-    def __init__(self, url, username=None, password=None, timeout=10):
+    def __init__(self, url, verify=True,username=None, password=None, timeout=10):
         self.url = url
         self.token = None
+        self.verify = verify
         if username and password:
             token = '{}:{}'.format(username, password).encode('utf-8')
             token = base64.b64encode(token).decode('utf-8')
@@ -31,12 +33,18 @@ class HarperDBBase():
         }
         if self.token:
             headers['Authorization'] = self.token
+        
+        # Suppress the warnings from urllib3 due to Self Signed SSL Cert.
+        if not self.verify:
+            requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
         response = requests.request(
             'POST',
             self.url,
             headers=headers,
             data=json.dumps(data),
-            timeout=self.timeout)
+            timeout=self.timeout,
+            verify=self.verify)
         body = response.json()
         try:
             response.raise_for_status()
