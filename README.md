@@ -34,6 +34,7 @@ db = harperdb.HarperDB(
   - **username** (string): (optional) Basic Auth username
   - **password** (string): (optional) Basic Auth password
   - **timeout** (float): Seconds to wait for a server response, default 10
+  - **verify** (bool): Option to verify SSL Certificate, default True
 
 #### Instance Attributes:
 
